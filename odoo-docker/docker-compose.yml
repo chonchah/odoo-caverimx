@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  web:
+    image: odoo:latest
+    restart: always
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./odoo/config:/etc/odoo
+      - ./odoo/addons:/mnt/extra-addons
+    networks: 
+      - frontend
+    links: 
+      - db
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWD}
+      - POSTGRES_USER=${DB_USER}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./backup:/backup
+      - ${ODOO_DATA}:/var/lib/postgresql/data/
+    networks: 
+      - frontend
+networks:
+  frontend:
+    driver: ${NETWORKS_DRIVER}
+volumes:
+  odoo-web-data:
